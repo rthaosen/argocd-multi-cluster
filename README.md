@@ -1,13 +1,28 @@
-# Prerequisites
-kubectl – A command line tool for working with Kubernetes clusters. For more information, see Installing or updating kubectl. https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
+# EKS and Argo CD Setup
 
-eksctl – A command line tool for working with EKS clusters that automates many individual tasks. For more information, see Installing or updating. https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html
+## Introduction
+Setting up Amazon EKS clusters and configuring Argo CD for managing applications across multiple clusters.
 
-AWS CLI – A command line tool for working with AWS services, including Amazon EKS. For more information, see Installing, updating, and uninstalling the AWS CLI https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html in the AWS Command Line Interface User Guide.
+## Prerequisites
 
-After installing the AWS CLI, I recommend that you also configure it. For more information, see Quick configuration with aws configure in the AWS Command Line Interface User Guide. https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html#cli-configure-quickstart-config
+Ensure the following tools are installed:
 
-Argo CD CLI(Not the actual Argo CD Installation) - https://argo-cd.readthedocs.io/en/stable/cli_installation/#installation
+- **kubectl**: Command line tool for working with Kubernetes clusters.  
+  [Installation Guide](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html)
+
+- **eksctl**: Command line tool for managing EKS clusters.  
+  [Installation Guide](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html)
+
+- **AWS CLI**: Command line tool for interacting with AWS services.  
+  [Installation Guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
+
+- **Argo CD CLI**: Command line tool for managing Argo CD.  
+  [Installation Guide](https://argo-cd.readthedocs.io/en/stable/cli_installation/#installation)
+
+After installing the AWS CLI, configure it with:
+
+aws configure
+
 
 # EKS Setup
 
@@ -29,16 +44,26 @@ eksctl delete cluster --name spoke-cluster-2 --region us-west-1
 
 
 # Argo CD Setup
-## Install Argo CD
+## Install Argo CD in hub cluster
 commands:
 kubectl create namespace argocd
 
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
-## Run Argo CD in HTTP Mode(Insecure)
+## Run Argo CD in HTTP Mode(Insecure - not recommended for production environments)
 https://github.com/argoproj/argo-cd/blob/54f1572d46d8d611018f4854cf2f24a24a3ac088/docs/operator-manual/argocd-cmd-params-cm.yaml#L82
 
 ## Expose Argo CD Server Service in NodePort Mode
 command: kubectl edit svc argocd-server -n argocd
 
 and change the type to NodePort from ClusterIP
+
+## Add Spoke Clusters to Argo CD
+Install the Argo CD CLI and run the below command to add spoke clusters:
+
+argocd cluster add <spoke-clustername> --server <argocd_server_ip:port>
+
+
+Now we can create applications in both the spoke clusters.
+
+![ArgoCD deployment](argocd-ui-application.jpg)
